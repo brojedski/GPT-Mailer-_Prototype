@@ -1,0 +1,66 @@
+<?php
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = htmlspecialchars($_POST['name']);
+    $senderEmail = htmlspecialchars($_POST['email']);
+    $message = htmlspecialchars($_POST['message']);
+    $recipients = explode(',', $_POST['recipients']);
+    
+    $subject = "Message from $name";
+    
+    // Prepare headers
+    $headers = "MIME-Version: 1.0" . "\r\n";
+    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+    $headers .= "From: $senderEmail\r\n";
+    
+    // Email body
+    $emailBody = "<html><body>";
+    $emailBody .= "<h2>Message from: $name</h2>";
+    $emailBody .= "<p>$message</p>";
+    $emailBody .= "</body></html>";
+
+    // Send email to each recipient
+    foreach ($recipients as $recipient) {
+        $recipient = trim($recipient); // Remove any extra spaces
+        if (filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
+            mail($recipient, $subject, $emailBody, $headers);
+        }
+    }
+
+    echo "<h3>Emails sent successfully!</h3>";
+} else {
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email List Sender</title>
+</head>
+<body>
+    <h2>Send Email to List</h2>
+    <form action="" method="post">
+        <label for="name">Your Name:</label>
+        <input type="text" id="name" name="name" required>
+        <br>
+
+        <label for="email">Your Email:</label>
+        <input type="email" id="email" name="email" required>
+        <br>
+
+        <label for="message">Message:</label>
+        <textarea id="message" name="message" required></textarea>
+        <br>
+
+        <label for="recipients">Recipients (comma-separated):</label>
+        <input type="text" id="recipients" name="recipients" required placeholder="email1@example.com, email2@example.com">
+        <br>
+
+        <button type="submit">Send Email</button>
+    </form>
+</body>
+</html>
+
+<?php
+}
+?>
