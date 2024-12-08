@@ -1,0 +1,148 @@
+<?php
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = htmlspecialchars($_POST['name']);
+    $senderEmail = htmlspecialchars($_POST['email']);
+    $message = htmlspecialchars($_POST['message']);
+    $recipients = explode(',', $_POST['recipients']);
+    
+    $subject = "Message from $name";
+    
+    // Prepare headers
+    $headers = "MIME-Version: 1.0" . "\r\n";
+    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+    $headers .= "From: $senderEmail\r\n";
+    
+    // Email body
+    $emailBody = "<html><body>";
+    $emailBody .= "<h2>Message from: $name</h2>";
+    $emailBody .= "<p>$message</p>";
+    $emailBody .= "</body></html>";
+
+    // Send email to each recipient
+    foreach ($recipients as $recipient) {
+        $recipient = trim($recipient); // Remove any extra spaces
+        if (filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
+            mail($recipient, $subject, $emailBody, $headers);
+        }
+    }
+
+    echo "<h3 style='color: green;'>Emails sent successfully!</h3>";
+} else {
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email List Sender</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh; /* Full viewport height */
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 30px;
+            width: 90%;
+            max-width: 500px; /* Max width for larger screens */
+            transition: transform 0.3s ease-in-out;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease-in-out;
+        }
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        textarea:focus {
+            border-color: #28a745; /* Green border on focus */
+            outline: none; /* Remove default outline */
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease-in-out;
+        }
+        button:hover {
+            background-color: #218838; /* Darker green on hover */
+        }
+        .success-message,
+        .error-message {
+            text-align: center;
+        }
+        .error-message {
+            color: red; /* Red color for error messages */
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Send Email to List</h2>
+    <form action="" method="post" id="emailForm">
+        <label for="name">Your Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="email">Your Email:</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="message">Message:</label>
+        <textarea id="message" name="message" required></textarea>
+
+        <label for="recipients">Recipients (comma-separated):</label>
+        <input type="text" id="recipients" name="recipients" required placeholder="email1@example.com, email2@example.com">
+
+        <button type="submit">Send Email</button>
+        
+        <div id="responseMessage"></div>
+    </form>
+</div>
+
+<script>
+document.getElementById('emailForm').onsubmit = function(event) {
+    event.preventDefault(); // Prevent the default form submission
+    
+    // Simple client-side validation
+    const recipientsInput = document.getElementById('recipients').value.trim();
+    
+    if (!recipientsInput) {
+        document.getElementById('responseMessage').innerHTML = '<p class="error-message">Please enter at least one recipient email.</p>';
+        return false; 
+    }
+
+    this.submit(); // Submit the form if validation passes
+};
+</script>
+
+<?php
+}
+?>
